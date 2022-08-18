@@ -1,0 +1,34 @@
+version: "3"
+services:
+
+  lakefs:
+    image: treeverse/lakefs:latest
+    container_name: lakefs
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
+      - LAKEFS_BLOCKSTORE_S3_REGION=eu-west-1
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=x
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=x
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SESSION_TOKEN=x
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=1111
+      - LAKEFS_DATABASE_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      - LAKEFS_STATS_ENABLED=false
+      - LAKEFS_LOGGING_LEVEL
+    entrypoint: ["/app/wait-for", "postgres:5432", "--", "/app/lakefs", "run"]
+
+  postgres:
+    image: postgres:11
+    container_name: postgres
+    environment:
+      POSTGRES_USER: lakefs
+      POSTGRES_PASSWORD: lakefs
+
+networks:
+  default:
+    name: bagel
+
